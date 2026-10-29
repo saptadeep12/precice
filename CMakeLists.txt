@@ -714,29 +714,35 @@ IF (BUILD_TESTING)
 
     add_test(
       NAME precice.MPMDCommunicator
-      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROCS_FLAG} 2
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
               $<TARGET_FILE:precice-mpmd-test> automatic
               ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml :
-              ${MPIEXEC_NUMPROCS_FLAG} 3
+              ${MPIEXEC_NUMPROC_FLAG} 3
               $<TARGET_FILE:precice-mpmd-test> automatic
               ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
     add_test(
       NAME precice.MPMDCommunicatorCustom
-      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROCS_FLAG} 2
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
               $<TARGET_FILE:precice-mpmd-test> custom
               ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml :
-              ${MPIEXEC_NUMPROCS_FLAG} 3
+              ${MPIEXEC_NUMPROC_FLAG} 3
               $<TARGET_FILE:precice-mpmd-test> custom
               ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
     add_test(
       NAME precice.MPMDCommunicatorStandalone
-      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROCS_FLAG} 2
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
               $<TARGET_FILE:precice-mpmd-test> ordinary
+              ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
+    add_test(
+      NAME precice.MPMDCommunicatorCustomWrong
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
+              $<TARGET_FILE:precice-mpmd-test> custom-wrong
               ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
     set_tests_properties(
       precice.MPMDCommunicator
       precice.MPMDCommunicatorCustom
       precice.MPMDCommunicatorStandalone
+      precice.MPMDCommunicatorCustomWrong
       PROPERTIES
       SKIP_RETURN_CODE 77
       TIMEOUT 30)

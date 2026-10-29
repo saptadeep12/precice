@@ -130,13 +130,18 @@ ParticipantImpl::ParticipantImpl(
 
   {
     const auto currentRank = utils::Parallel::current()->rank();
-    PRECICE_CHECK(_accessorProcessRank == currentRank,
-                  "The solver process index given in the preCICE interface constructor({}) does not match the rank of the passed MPI communicator ({}).",
-                  _accessorProcessRank, currentRank);
     const auto currentSize = utils::Parallel::current()->size();
-    PRECICE_CHECK(_accessorCommunicatorSize == currentSize,
-                  "The solver process size given in the preCICE interface constructor({}) does not match the size of the passed MPI communicator ({}).",
-                  _accessorCommunicatorSize, currentSize);
+    if (utils::Parallel::isMPMDSplit()) {
+      _accessorProcessRank      = currentRank;
+      _accessorCommunicatorSize = currentSize;
+    } else {
+      PRECICE_CHECK(_accessorProcessRank == currentRank,
+                    "The solver process index given in the preCICE interface constructor({}) does not match the rank of the passed MPI communicator ({}).",
+                    _accessorProcessRank, currentRank);
+      PRECICE_CHECK(_accessorCommunicatorSize == currentSize,
+                    "The solver process size given in the preCICE interface constructor({}) does not match the size of the passed MPI communicator ({}).",
+                    _accessorCommunicatorSize, currentSize);
+    }
   }
   e3.stop();
 #else
