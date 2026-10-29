@@ -43,6 +43,11 @@ Participant::Participant(
 
 Participant::~Participant() = default;
 
+void *Participant::getCommunicator() const
+{
+  return _impl->getCommunicator();
+}
+
 void Participant::initialize()
 {
   _impl->initialize();

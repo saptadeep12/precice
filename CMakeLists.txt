@@ -703,6 +703,45 @@ IF (BUILD_TESTING)
   include(${CMAKE_CURRENT_LIST_DIR}/src/tests.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/tests/tests.cmake)
 
+  if(PRECICE_FEATURE_MPI_COMMUNICATION)
+    add_executable(precice-mpmd-test "tests/parallel/MPMDCommunicator.cpp")
+    target_link_libraries(precice-mpmd-test PRIVATE preciceCore MPI::MPI_CXX)
+    target_include_directories(precice-mpmd-test PRIVATE ${preCICE_SOURCE_DIR}/src)
+    set_target_properties(precice-mpmd-test PROPERTIES
+      CXX_STANDARD ${PRECICE_CXX_STANDARD}
+      CXX_STANDARD_REQUIRED Yes
+      CXX_EXTENSIONS No)
+
+    add_test(
+      NAME precice.MPMDCommunicator
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROCS_FLAG} 2
+              $<TARGET_FILE:precice-mpmd-test> automatic
+              ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml :
+              ${MPIEXEC_NUMPROCS_FLAG} 3
+              $<TARGET_FILE:precice-mpmd-test> automatic
+              ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
+    add_test(
+      NAME precice.MPMDCommunicatorCustom
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROCS_FLAG} 2
+              $<TARGET_FILE:precice-mpmd-test> custom
+              ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml :
+              ${MPIEXEC_NUMPROCS_FLAG} 3
+              $<TARGET_FILE:precice-mpmd-test> custom
+              ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
+    add_test(
+      NAME precice.MPMDCommunicatorStandalone
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROCS_FLAG} 2
+              $<TARGET_FILE:precice-mpmd-test> ordinary
+              ${preCICE_SOURCE_DIR}/tests/parallel/UserDefinedMPICommunicator.xml)
+    set_tests_properties(
+      precice.MPMDCommunicator
+      precice.MPMDCommunicatorCustom
+      precice.MPMDCommunicatorStandalone
+      PROPERTIES
+      SKIP_RETURN_CODE 77
+      TIMEOUT 30)
+  endif()
+
   if(PRECICE_BUILD_UNITY)
     set_target_properties(testprecice PROPERTIES
       UNITY_BUILD Yes

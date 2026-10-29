@@ -13,6 +13,48 @@
 
 namespace precice::utils {
 
+namespace {
+
+bool hasMPMDAppnum(MPI_Comm comm, int &appnum)
+{
+  int *appnumPtr = nullptr;
+  int   flag      = 0;
+  auto  err       = MPI_Comm_get_attr(comm, MPI_APPNUM, &appnumPtr, &flag);
+  PRECICE_ASSERT(err == MPI_SUCCESS, "MPI_Comm_get_attr failed while detecting an MPMD launch.");
+
+  int allRanksHaveAppnum = 0;
+  auto allRanksErr        = MPI_Allreduce(&flag, &allRanksHaveAppnum, 1, MPI_INT, MPI_MIN, comm);
+  PRECICE_ASSERT(allRanksErr == MPI_SUCCESS, "MPI_Allreduce failed while detecting an MPMD launch.");
+
+  if (allRanksHaveAppnum == 0 || appnumPtr == nullptr) {
+    return false;
+  }
+
+  appnum = *appnumPtr;
+  return true;
+}
+
+bool hasDifferentMPMDAppnums(MPI_Comm comm, int appnum)
+{
+  int minimum = 0;
+  int maximum = 0;
+  auto minErr = MPI_Allreduce(&appnum, &minimum, 1, MPI_INT, MPI_MIN, comm);
+  auto maxErr = MPI_Allreduce(&appnum, &maximum, 1, MPI_INT, MPI_MAX, comm);
+  PRECICE_ASSERT(minErr == MPI_SUCCESS && maxErr == MPI_SUCCESS,
+                 "MPI_Allreduce failed while detecting an MPMD launch.");
+  return minimum != maximum;
+}
+
+void splitMPMDCommunicator()
+{
+  int appnum = 0;
+  if (hasMPMDAppnum(MPI_COMM_WORLD, appnum) && hasDifferentMPMDAppnums(MPI_COMM_WORLD, appnum)) {
+    Parallel::splitCommunicator(appnum);
+  }
+}
+
+} // namespace
+
 logging::Logger Parallel::_log("utils::Parallel");
 
 Parallel::CommStatePtr Parallel::_currentState            = nullptr;
@@ -209,6 +251,7 @@ void Parallel::initializeOrDetectMPI(std::optional<Communicator> userProvided)
     _currentState            = CommState::world();
     _initState               = InitializationState::Managed;
     _mpiInitializedByPrecice = true;
+    splitMPMDCommunicator();
     return;
   }
 
@@ -218,6 +261,7 @@ void Parallel::initializeOrDetectMPI(std::optional<Communicator> userProvided)
     // We need to use MPI_COMM_WORLD
     _currentState = CommState::world();
     _initState    = InitializationState::Unmanaged;
+    splitMPMDCommunicator();
     return;
   }
 

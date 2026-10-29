@@ -81,6 +81,9 @@ public:
    */
   ~ParticipantImpl();
 
+    /// @copydoc Participant::getCommunicator
+    void *getCommunicator() const;
+
   ///@}
 
   /// @name Steering Methods

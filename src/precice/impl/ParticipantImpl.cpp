@@ -169,6 +169,16 @@ ParticipantImpl::~ParticipantImpl()
   }
 }
 
+void *ParticipantImpl::getCommunicator() const
+{
+#ifndef PRECICE_NO_MPI
+  PRECICE_CHECK(_state != State::Finalized, "getCommunicator() cannot be called after finalize().");
+  return const_cast<void *>(static_cast<const void *>(&utils::Parallel::current()->comm));
+#else
+  return nullptr;
+#endif
+}
+
 void ParticipantImpl::configure(
     std::string_view configurationFileName)
 {

@@ -224,6 +224,20 @@ public:
 
   ~Participant();
 
+    /**
+     * @brief Returns the communicator used by preCICE.
+     *
+     * The returned pointer points to an MPI_Comm and is valid after construction
+     * until finalize() is called. The communicator is owned by preCICE and must
+     * not be freed or modified by the caller.
+     *
+     * For a standalone start, this returns the communicator preCICE uses. For a
+     * user-provided communicator, it returns that same communicator. For an
+     * MPMD start without a user-provided communicator, it returns the
+     * preCICE-created local communicator.
+     */
+    void *getCommunicator() const;
+
   ///@}
 
   /** @name Steering Methods
