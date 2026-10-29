@@ -45,12 +45,14 @@ bool hasDifferentMPMDAppnums(MPI_Comm comm, int appnum)
   return minimum != maximum;
 }
 
-void splitMPMDCommunicator()
+bool splitMPMDCommunicator()
 {
   int appnum = 0;
   if (hasMPMDAppnum(MPI_COMM_WORLD, appnum) && hasDifferentMPMDAppnums(MPI_COMM_WORLD, appnum)) {
     Parallel::splitCommunicator(appnum);
+    return true;
   }
+  return false;
 }
 
 } // namespace
@@ -61,6 +63,7 @@ Parallel::CommStatePtr Parallel::_currentState            = nullptr;
 bool                   Parallel::_mpiInitializedByPrecice = false;
 
 Parallel::InitializationState Parallel::_initState = Parallel::InitializationState::Uninitialized;
+bool                             Parallel::_mpmdSplit = false;
 
 /// BEGIN CommState
 
@@ -195,6 +198,11 @@ Parallel::CommStatePtr Parallel::current()
   return _currentState;
 }
 
+bool Parallel::isMPMDSplit()
+{
+  return _mpmdSplit;
+}
+
 void Parallel::resetCommState()
 {
   _currentState = CommState::world();
@@ -251,7 +259,7 @@ void Parallel::initializeOrDetectMPI(std::optional<Communicator> userProvided)
     _currentState            = CommState::world();
     _initState               = InitializationState::Managed;
     _mpiInitializedByPrecice = true;
-    splitMPMDCommunicator();
+    _mpmdSplit               = splitMPMDCommunicator();
     return;
   }
 
@@ -261,7 +269,7 @@ void Parallel::initializeOrDetectMPI(std::optional<Communicator> userProvided)
     // We need to use MPI_COMM_WORLD
     _currentState = CommState::world();
     _initState    = InitializationState::Unmanaged;
-    splitMPMDCommunicator();
+    _mpmdSplit    = splitMPMDCommunicator();
     return;
   }
 
@@ -286,6 +294,7 @@ void Parallel::finalizeOrCleanupMPI()
     PRECICE_ASSERT(_mpiInitializedByPrecice, "Something changed this state!");
   }
 
+  _mpmdSplit = false;
   _initState = InitializationState::Uninitialized;
 #endif // not PRECICE_NO_MPI
 }

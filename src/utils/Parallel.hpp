@@ -212,6 +212,9 @@ public:
   /// Returns an owning pointer to the current CommState.
   static CommStatePtr current();
 
+  /// Returns whether the current communicator was created by automatic MPMD detection.
+  static bool isMPMDSplit();
+
   /// @}
 
 private:
@@ -232,6 +235,9 @@ private:
   };
 
   static InitializationState _initState;
+
+  /// Whether the current state was created by automatic MPMD detection.
+  static bool _mpmdSplit;
 
   /** Pushes a new state on the state stack
    *
