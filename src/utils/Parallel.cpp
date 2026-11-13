@@ -18,11 +18,11 @@ namespace {
 bool hasMPMDAppnum(MPI_Comm comm, int &appnum)
 {
   int *appnumPtr = nullptr;
-  int   flag      = 0;
-  auto  err       = MPI_Comm_get_attr(comm, MPI_APPNUM, &appnumPtr, &flag);
+  int  flag      = 0;
+  auto err       = MPI_Comm_get_attr(comm, MPI_APPNUM, &appnumPtr, &flag);
   PRECICE_ASSERT(err == MPI_SUCCESS, "MPI_Comm_get_attr failed while detecting an MPMD launch.");
 
-  int allRanksHaveAppnum = 0;
+  int  allRanksHaveAppnum = 0;
   auto allRanksErr        = MPI_Allreduce(&flag, &allRanksHaveAppnum, 1, MPI_INT, MPI_MIN, comm);
   PRECICE_ASSERT(allRanksErr == MPI_SUCCESS, "MPI_Allreduce failed while detecting an MPMD launch.");
 
@@ -36,10 +36,10 @@ bool hasMPMDAppnum(MPI_Comm comm, int &appnum)
 
 bool hasDifferentMPMDAppnums(MPI_Comm comm, int appnum)
 {
-  int minimum = 0;
-  int maximum = 0;
-  auto minErr = MPI_Allreduce(&appnum, &minimum, 1, MPI_INT, MPI_MIN, comm);
-  auto maxErr = MPI_Allreduce(&appnum, &maximum, 1, MPI_INT, MPI_MAX, comm);
+  int  minimum = 0;
+  int  maximum = 0;
+  auto minErr  = MPI_Allreduce(&appnum, &minimum, 1, MPI_INT, MPI_MIN, comm);
+  auto maxErr  = MPI_Allreduce(&appnum, &maximum, 1, MPI_INT, MPI_MAX, comm);
   PRECICE_ASSERT(minErr == MPI_SUCCESS && maxErr == MPI_SUCCESS,
                  "MPI_Allreduce failed while detecting an MPMD launch.");
   return minimum != maximum;

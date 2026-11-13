@@ -10,7 +10,7 @@ namespace {
 int getAppnum()
 {
   int *appnum = nullptr;
-  int  flag    = 0;
+  int  flag   = 0;
   MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_APPNUM, &appnum, &flag);
   return flag && appnum != nullptr ? *appnum : -1;
 }
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
   MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 
-  const std::string mode = argv[1];
+  const std::string mode   = argv[1];
   const int         appnum = getAppnum();
   if (appnum < 0 && mode == "custom" && worldSize == 5) {
     MPI_Finalize();
@@ -113,11 +113,11 @@ int main(int argc, char **argv)
     }
   } else if (mode == "custom") {
     MPI_Comm custom = MPI_COMM_WORLD;
-    result         = checkCommunicator(argv[2], name, worldRank, worldSize, worldRank, worldSize, &custom, true,
-                                       MPI_COMM_WORLD, MPI_IDENT);
+    result          = checkCommunicator(argv[2], name, worldRank, worldSize, worldRank, worldSize, &custom, true,
+                                        MPI_COMM_WORLD, MPI_IDENT);
   } else if (mode == "custom-wrong") {
     MPI_Comm custom = MPI_COMM_WORLD;
-    bool      threw  = false;
+    bool     threw  = false;
     try {
       checkCommunicator(argv[2], "SolverOne", worldRank == 0 ? 1 : 0, worldSize, worldRank, worldSize, &custom, true,
                         MPI_COMM_WORLD, MPI_IDENT);

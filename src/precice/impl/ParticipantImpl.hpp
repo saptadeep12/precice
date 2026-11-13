@@ -81,8 +81,8 @@ public:
    */
   ~ParticipantImpl();
 
-    /// @copydoc Participant::getCommunicator
-    void *getCommunicator() const;
+  /// @copydoc Participant::getCommunicator
+  void *getCommunicator() const;
 
   ///@}
 
